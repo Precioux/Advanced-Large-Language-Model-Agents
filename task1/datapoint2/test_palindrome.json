@@ -1,0 +1,64 @@
+[
+  {
+    "input": {
+      "xs": [
+        1,
+        2,
+        3,
+        2,
+        1
+      ]
+    },
+    "expected": true,
+    "unexpected": [
+      false
+    ]
+  },
+  {
+    "input": {
+      "xs": [
+        1,
+        2,
+        2,
+        1
+      ]
+    },
+    "expected": true,
+    "unexpected": [
+      false
+    ]
+  },
+  {
+    "input": {
+      "xs": [
+        1,
+        2,
+        3
+      ]
+    },
+    "expected": false,
+    "unexpected": [
+      true
+    ]
+  },
+  {
+    "input": {
+      "xs": []
+    },
+    "expected": true,
+    "unexpected": [
+      false
+    ]
+  },
+  {
+    "input": {
+      "xs": [
+        7
+      ]
+    },
+    "expected": true,
+    "unexpected": [
+      false
+    ]
+  }
+]

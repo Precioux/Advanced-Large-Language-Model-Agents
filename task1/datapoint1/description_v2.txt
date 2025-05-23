@@ -1,0 +1,10 @@
+-----Description-----
+This task requires writing a Lean 4 method that removes consecutive duplicate elements from a sorted list of natural numbers. The input list is guaranteed to be sorted in non-decreasing order. The output list should contain only the first occurrence of each number in the order they appear.
+
+-----Input-----
+The input is a single value:
+xs: A list of natural numbers (List Nat), sorted in non-decreasing order.
+
+-----Output-----
+The output is a list of natural numbers:
+Returns a new list where consecutive duplicates are removed, keeping only the first occurrence of each value.

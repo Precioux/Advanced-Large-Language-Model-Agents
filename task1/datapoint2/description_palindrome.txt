@@ -1,0 +1,10 @@
+-----Description-----
+This task requires writing a Lean 4 method that checks whether a given list of natural numbers is a palindrome. A palindrome is a list that reads the same forward and backward.
+
+-----Input-----
+The input is a single value:
+xs: A list of natural numbers (List Nat).
+
+-----Output-----
+The output is a Boolean:
+Returns true if the list is a palindrome (i.e., xs = reverse xs), and false otherwise.
