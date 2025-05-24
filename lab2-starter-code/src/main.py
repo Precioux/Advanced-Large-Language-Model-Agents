@@ -3,8 +3,9 @@ import argparse
 from src.agents import Reasoning_Agent, LLM_Agent
 from src.lean_runner import execute_lean_code
 from typing import Dict, List, Tuple
+import re
 
-type LeanCode = Dict[str, str]
+LeanCode = Dict[str, str]
 
 def main_workflow(problem_description: str, task_lean_code: str = "") -> LeanCode:
     """
@@ -18,22 +19,149 @@ def main_workflow(problem_description: str, task_lean_code: str = "") -> LeanCod
     Returns:
         LeanCode: Final generated solution, which is a dictionary with two keys: "code" and "proof".
     """
-    generated_function_implementation = "sorry"
-    generated_proof = "sorry"
+    planner = Reasoning_Agent()
+    generator = LLM_Agent()
 
-    # TODO Implement your coding workflow here. The unit tests will call this function as the main workflow.
-    # Feel free to chain multiple agents together, use the RAG database (.pkl) file, corrective feedback, etc.
-    # Please use the agents provided in the src/agents.py module, which include GPT-4o and the O3-mini models.
-    ...
+    ################################################################
 
-    # Example return for task_id_0
-    generated_function_implementation = "x"
-    generated_proof = "rfl"
-    
+    # Step 2: Generate a high-level plan
+    planning_prompt = f"""You are a Lean 4 planning assistant.
+    Here is the problem description from a theorem proving task:
+
+    {problem_description}
+
+    Please:
+    1. Summarize the task in 1-2 lines.
+    2. Describe the approach to implement the function.
+    3. Describe how the proof can be structured and which Lean tactics or properties might help.
+    """
+    plan_messages = [
+        {"role": "system", "content": "You are a helpful Lean 4 planning assistant."},
+        {"role": "user", "content": planning_prompt}
+    ]
+    plan = planner.get_response(plan_messages)
+
+    ################################################################
+
+    # Step 3: Generate Lean code and proof using the LLM agent
+    generation_prompt = f"""You are a Lean 4 code and proof generator.
+    Here is the problem description:
+
+    {problem_description}
+
+    Here is a suggested plan from a planning agent:
+
+    {plan}
+
+    Here is the Lean template with placeholders ({{code}} and {{proof}}):
+
+    {task_lean_code}
+
+    Fill in the code and proof sections. Respond in this format:
+
+    code:
+    ```lean
+    <your Lean code here>
+    ```
+
+    proof:
+    ```lean
+    <your Lean proof here>
+    ```"""
+
+    generation_messages = [
+        {"role": "system", "content": "You are a Lean 4 code and proof generator."},
+        {"role": "user", "content": generation_prompt}
+    ]
+    response = generator.get_response(generation_messages)
+
+    ################################################################
+
+    # Step 4: Extract code and proof
+    generated_function_implementation = extract_section(response, "code")
+    generated_proof = extract_section(response, "proof")
+
+    ################################################################
+
+    # Step 5: Verification and Feedback Loop
+    max_attempts = 3
+    attempt = 0
+
+    while attempt < max_attempts:
+        filled_lean_code = task_lean_code.replace("{{code}}", generated_function_implementation).replace("{{proof}}",
+                                                                                                         generated_proof)
+        execution_result = execute_lean_code(filled_lean_code)
+
+        if "error" not in execution_result.lower():
+            break
+
+        feedback_prompt = f"""The following Lean code has errors:
+            {execution_result}
+
+            Please revise both the code and proof based on the errors and previous context:
+            Problem Description:
+            {problem_description}
+
+            Plan:
+            {plan}
+
+            Current code:
+            {generated_function_implementation}
+
+            Current proof:
+            {generated_proof}
+
+            Respond in the same format:
+            code:
+            ```lean
+            <your corrected Lean code here>
+            ```
+
+            proof:
+            ```lean
+            <your corrected Lean proof here>
+            ```"""
+
+        feedback_messages = [
+            {"role": "system", "content": "You are a Lean 4 code and proof generator."},
+            {"role": "user", "content": feedback_prompt}
+        ]
+        response = generator.get_response(feedback_messages)
+
+        generated_function_implementation = extract_section(response, "code")
+        generated_proof = extract_section(response, "proof")
+        attempt += 1
+
+        ################################################################
+
+
     return {
         "code": generated_function_implementation,
         "proof": generated_proof
     }
+
+
+    # # TODO Implement your coding workflow here. The unit tests will call this function as the main workflow.
+    # # Feel free to chain multiple agents together, use the RAG database (.pkl) file, corrective feedback, etc.
+    # # Please use the agents provided in the src/agents.py module, which include GPT-4o and the O3-mini models.
+    # ...
+    #
+    # # Example return for task_id_0
+    # generated_function_implementation = "x"
+    # generated_proof = "rfl"
+    #
+    # return {
+    #     "code": generated_function_implementation,
+    #     "proof": generated_proof
+    # }
+
+def extract_section(text: str, section: str) -> str:
+    """
+    Extracts the code or proof block from the generator response.
+    """
+    pattern = rf"{section}:\s*```lean\n(.*?)```"
+    match = re.search(pattern, text, re.DOTALL)
+    return match.group(1).strip() if match else ""
 
 def get_problem_and_code_from_taskpath(task_path: str) -> Tuple[str, str]:
     """

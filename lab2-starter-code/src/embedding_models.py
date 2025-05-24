@@ -1,9 +1,5 @@
-from abc import ABC, abstractmethod
-from sentence_transformers import SentenceTransformer
-import numpy as np
-import tiktoken
 import os
-from openai import OpenAI
+from model_check import OpenAI
 from abc import ABC, abstractmethod
 import numpy as np
 from typing import List, Tuple

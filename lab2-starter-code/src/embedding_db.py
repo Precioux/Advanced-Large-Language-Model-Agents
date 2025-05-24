@@ -2,8 +2,7 @@ import os
 import numpy as np
 import requests
 from bs4 import BeautifulSoup
-from openai import OpenAI
-import tiktoken  # For token counting
+from model_check import OpenAI
 import PyPDF2
 from src.embedding_models import BaseEmbeddingModel, OpenAIEmbeddingModel, MiniEmbeddingModel
 import pickle 

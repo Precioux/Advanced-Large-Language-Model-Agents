@@ -1,7 +1,10 @@
 from openai import OpenAI
 import os
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(
+    base_url="https://api.avalai.ir/v1",
+    api_key=os.getenv("AVALAI_API_KEY")
+)
 
 class LLM_Agent:
     def __init__(self, model: str = "gpt-4o"):
@@ -31,7 +34,7 @@ class LLM_Agent:
         return completion.choices[0].message.content
 
 class Reasoning_Agent(LLM_Agent):
-    def __init__(self, model: str = "o3-mini"):
+    def __init__(self, model: str = "gpt-4o"):
         """
         Initializes the OpenAI client with the selected model.
 
@@ -50,7 +53,7 @@ if __name__ == "__main__":
     #response = agent.get_response(messages)
     #print(response)
     
-    reasoning_agent = Reasoning_Agent(model="o3-mini")
+    reasoning_agent = Reasoning_Agent(model="gpt-4o")
     messages = [
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "Can you explain the concept of recursion in programming?"}
