@@ -1,5 +1,3 @@
-import Mathlib
-import Aesop
 
 -- Implementation
 def hasOppositeSign (a : Int) (b : Int) : Bool :=

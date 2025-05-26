@@ -1,10 +1,7 @@
 from openai import OpenAI
 import os
 
-client = OpenAI(
-    base_url="https://api.avalai.ir/v1",
-    api_key=os.getenv("AVALAI_API_KEY")
-)
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 class LLM_Agent:
     def __init__(self, model: str = "gpt-4o"):

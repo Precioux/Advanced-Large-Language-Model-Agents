@@ -24,7 +24,7 @@ def execute_lean_code(code: str) -> str:
         
         # Execute Lean within the temp_project directory
         result = subprocess.run(
-            ["lake", "lean", temp_path],
+            ["lean", temp_path],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
